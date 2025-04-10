@@ -1,6 +1,7 @@
 import express from 'express';
 import authenticateToken from '../middleware/authMiddleware.js';
 import User from '../models/User.js';
+import authorizeRoles from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
@@ -15,5 +16,14 @@ router.get('/me', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Error al obtener usuario' });
   }
 });
+
+router.get('/admin',
+    authenticateToken,
+    authorizeRoles('admin'),
+    async(req,res)=>{
+    const users = await User.findAll({attributes:['id','username','role']});
+    res.json(users);
+    }
+);
 
 export default router;

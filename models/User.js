@@ -16,12 +16,17 @@ const User = sequelize.define('User',{
     password:{
         type:DataTypes.STRING,
         allowNull:false
+    },
+    role:{
+    type:DataTypes.STRING,
+    allowNull:false,
+    defaultValue:'user'
     }
 });
 
 export class UserRepository {
 
-    static async create({username,password}){
+    static async create({username,password,role='user'}){
           // Validaciones básicas
     if (typeof username !== 'string') throw new Error('El username no es un string');
     if (username.length < 3) throw new Error('El usuario no puede tener menos de 3 caracteres');
@@ -32,9 +37,10 @@ export class UserRepository {
     // Verificar si ya exisiste
     const existingUser = await User.findOne({where:{username}});
     if(existingUser) throw new Error('El usuario ya existe');
+
     // Encryptamos el password
     const hashedPassword = await bcrypt.hash(password,10);
-    const newUser = await User.create({username,password:hashedPassword});
+    const newUser = await User.create({username,password:hashedPassword,role});
 
     return newUser.id
     }
